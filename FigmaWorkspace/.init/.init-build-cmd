@@ -1,0 +1,21 @@
+{ "working_directory": "/home/kavia/workspace/code-generation",
+ "command": "#!/usr/bin/env bash
+set -euo pipefail
+# Build step: create dist/ from public/ and emit evidence
+export NODE_ENV=development
+WORKSPACE="/home/kavia/workspace/code-generation/figma-project-1865-1874/FigmaWorkspace"
+cd "$WORKSPACE"
+# Validate workspace and public
+[ -d "$WORKSPACE" ] || { echo "ERROR: workspace not found: $WORKSPACE" >&2; exit 2; }
+[ -d "$WORKSPACE/public" ] || { echo "ERROR: public/ directory missing in workspace" >&2; exit 3; }
+# Ensure dist is recreated from public
+rm -rf "$WORKSPACE/dist" && mkdir -p "$WORKSPACE/dist"
+# Use rsync-like copy that preserves files; fallback to cp -r
+if command -v rsync >/dev/null 2>&1; then
+  rsync -a --delete "$WORKSPACE/public/" "$WORKSPACE/dist/"
+else
+  cp -a "$WORKSPACE/public/." "$WORKSPACE/dist/"
+fi
+# Produce concise evidence listing (first 200 lines)
+ls -la "$WORKSPACE/dist" | sed -n 1,200p
+" }
